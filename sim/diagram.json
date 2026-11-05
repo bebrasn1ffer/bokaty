@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "author": "Variant 3 - Server room",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-ntc-temperature-sensor", "id": "ntc1", "top": 240, "left": -120, "attrs": {} },
+    { "type": "wokwi-gas-sensor", "id": "gas1", "top": 240, "left": 40, "attrs": {} },
+    { "type": "wokwi-pir-motion-sensor", "id": "pir1", "top": -150, "left": -150, "attrs": {} },
+    { "type": "wokwi-relay-module", "id": "relay1", "top": -150, "left": 330, "attrs": {} },
+    { "type": "wokwi-resistor", "id": "r1", "top": -110, "left": 180, "attrs": { "value": "150" } },
+    { "type": "wokwi-led", "id": "led1", "top": -160, "left": 120, "attrs": { "color": "green" } }
+  ],
+  "connections": [
+    [ "uno:5V", "ntc1:VCC", "red", [ "v0" ] ],
+    [ "uno:GND.2", "ntc1:GND", "black", [ "v0" ] ],
+    [ "uno:A0", "ntc1:OUT", "green", [ "v0" ] ],
+
+    [ "uno:5V", "gas1:VCC", "red", [ "v0" ] ],
+    [ "uno:GND.2", "gas1:GND", "black", [ "v0" ] ],
+    [ "uno:A1", "gas1:AOUT", "orange", [ "v0" ] ],
+
+    [ "uno:5V", "pir1:VCC", "red", [ "v0" ] ],
+    [ "uno:GND.1", "pir1:GND", "black", [ "v0" ] ],
+    [ "uno:2", "pir1:OUT", "blue", [ "v0" ] ],
+
+    [ "uno:5V", "relay1:VCC", "red", [ "v0" ] ],
+    [ "uno:GND.1", "relay1:GND", "black", [ "v0" ] ],
+    [ "uno:7", "relay1:IN", "purple", [ "v0" ] ],
+
+    [ "uno:8", "r1:1", "green", [ "v0" ] ],
+    [ "r1:2", "led1:A", "green", [ "v0" ] ],
+    [ "led1:C", "uno:GND.1", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}
