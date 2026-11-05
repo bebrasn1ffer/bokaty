@@ -1,0 +1,23 @@
+[
+    {
+        "id": "a3d0000000000005",
+        "type": "function",
+        "z": "a3d0000000000001",
+        "name": "Разбор и проверка",
+        "func": "// Вариант 3. Время условное: номер цикла × 3 секунды.\nconst T = 3;\nconst ranges = {s1:[0,60], s2:[0,100], s3:[0,1]};\nconst text = String(msg.payload ?? '').replace(/^\\uFEFF/, '');\nconst lines = text.split(/\\r?\\n/);\nconst statements = [];\nlet count = 0;\nconst numberPattern = /^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?$/;\nfor (let index = 0; index < lines.length; index++) {\n    const line = lines[index].trim();\n    if (!line) continue;\n    const parts = line.split(/\\s+/);\n    const kind = parts.shift();\n    if (kind !== 'DATA' && kind !== 'EVENT') continue;\n    const f = {};\n    for (const part of parts) {\n        const eq = part.indexOf('=');\n        if (eq > 0) f[part.slice(0,eq)] = part.slice(eq+1);\n    }\n    if (!/^\\d+$/.test(f.n || '') || !Number.isSafeInteger(Number(f.n)) || Number(f.n) < 1 || Number(f.n) > 1000000000) {\n        node.error('Некорректный номер n в строке ' + (index + 1) + '. База не изменена.', msg);\n        return null;\n    }\n    const n = Number(f.n), time = n * T;\n    if (kind === 'DATA') {\n        count++;\n        for (const sensor of ['s1','s2','s3']) {\n            const raw = f[sensor];\n            const value = raw !== undefined && numberPattern.test(raw) ? Number(raw) : NaN;\n            if (Number.isFinite(value)) {\n                statements.push(`INSERT INTO readings(n,t_s,sensor,value) VALUES(${n},${time},'${sensor}',${value});`);\n            }\n            if (!Number.isFinite(value) || value < ranges[sensor][0] || value > ranges[sensor][1] || (sensor === 's3' && value !== 0 && value !== 1)) {\n                statements.push(`INSERT INTO events(n,t_s,type,message) VALUES(${n},${time},'FAULT','датчик ${sensor} вне диапазона');`);\n            }\n        }\n    } else {\n        if (!['THRESHOLD','NORMAL'].includes(f.type)) {\n            node.error('Неизвестный тип EVENT в строке ' + (index + 1) + '. База не изменена.', msg);\n            return null;\n        }\n        statements.push(`INSERT INTO events(n,t_s,type,message) VALUES(${n},${time},'${f.type}','');`);\n    }\n}\nif (!count) {\n    node.warn('В журнале нет строк DATA. Загрузка отменена: база не изменена.');\n    return null;\n}\nconst head = \"BEGIN;\\nDELETE FROM readings;\\nDELETE FROM events;\\nDELETE FROM sqlite_sequence WHERE name IN ('readings','events');\\n\";\nmsg.payload = head + statements.join('\\n') + '\\nCOMMIT;\\n';\nnode.status({fill:'green',shape:'dot',text:'Строк DATA: ' + count});\nreturn [null, msg];\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 130,
+        "wires": [
+            [],
+            [
+                "a3d0000000000006"
+            ]
+        ]
+    }
+]
