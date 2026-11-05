@@ -1,5 +1,72 @@
 [
     {
+        "id": "a3d0000000000001",
+        "type": "tab",
+        "label": "Вариант 3 — загрузка журнала",
+        "disabled": false,
+        "info": "Опрашивание T=3 с. Проверка диапазонов: s1 0–60 °C, s2 0–100 %, s3 0 или 1. При каждой загрузке существующие readings и events заменяются данными журнала."
+    },
+    {
+        "id": "a3d0000000000002",
+        "type": "watch",
+        "z": "a3d0000000000001",
+        "name": "Следить за data/log.txt",
+        "files": "data/log.txt",
+        "recursive": "",
+        "x": 170,
+        "y": 100,
+        "wires": [
+            [
+                "a3d0000000000004"
+            ]
+        ]
+    },
+    {
+        "id": "a3d0000000000003",
+        "type": "inject",
+        "z": "a3d0000000000001",
+        "name": "Загрузить вручную",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 170,
+        "wires": [
+            [
+                "a3d0000000000004"
+            ]
+        ]
+    },
+    {
+        "id": "a3d0000000000004",
+        "type": "file in",
+        "z": "a3d0000000000001",
+        "name": "Читать data/log.txt",
+        "filename": "data/log.txt",
+        "filenameType": "str",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": true,
+        "encoding": "none",
+        "allProps": false,
+        "x": 410,
+        "y": 130,
+        "wires": [
+            [
+                "a3d0000000000005"
+            ]
+        ]
+    },
+    {
         "id": "a3d0000000000005",
         "type": "function",
         "z": "a3d0000000000001",
@@ -19,5 +86,101 @@
                 "a3d0000000000006"
             ]
         ]
+    },
+    {
+        "id": "a3d0000000000006",
+        "type": "file",
+        "z": "a3d0000000000001",
+        "name": "Записать db/load.sql",
+        "filename": "db/load.sql",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": false,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 910,
+        "y": 130,
+        "wires": [
+            [
+                "a3d0000000000007"
+            ]
+        ]
+    },
+    {
+        "id": "a3d0000000000007",
+        "type": "exec",
+        "z": "a3d0000000000001",
+        "command": "sqlite3 db/variant.db \".read db/schema.sql\" \".read db/load.sql\"",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "Загрузить в SQLite",
+        "x": 1180,
+        "y": 130,
+        "wires": [
+            [
+                "a3d0000000000008"
+            ],
+            [
+                "a3d0000000000009"
+            ],
+            [
+                "a3d0000000000010"
+            ]
+        ]
+    },
+    {
+        "id": "a3d0000000000008",
+        "type": "debug",
+        "z": "a3d0000000000001",
+        "name": "Ответ sqlite3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1430,
+        "y": 90,
+        "wires": []
+    },
+    {
+        "id": "a3d0000000000009",
+        "type": "debug",
+        "z": "a3d0000000000001",
+        "name": "Ошибки sqlite3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1430,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "a3d0000000000010",
+        "type": "debug",
+        "z": "a3d0000000000001",
+        "name": "Код завершения sqlite3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1450,
+        "y": 190,
+        "wires": []
     }
 ]
